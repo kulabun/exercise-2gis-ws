@@ -1,0 +1,24 @@
+group 'ru.labun.worktest'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.apache.logging.log4j:log4j-core:2.5'
+    compile 'org.apache.logging.log4j:log4j-api:2.5'
+    compile 'org.glassfish.jersey.core:jersey-client:2.22.1'
+    compile 'org.glassfish.jersey.core:jersey-server:2.22.1'
+    compile 'org.glassfish.jersey.media:jersey-media-json-jackson:2.22.1'
+    compile 'org.apache.commons:commons-lang3:3.0'
+    compile 'org.glassfish.jersey.containers:jersey-container-jetty-http:2.22.1'
+
+    testCompile 'org.glassfish.jersey.test-framework:jersey-test-framework-core:2.22.1'
+    testCompile 'org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-jetty:2.22.1'
+    testCompile 'org.testng:testng:6.9.9'
+}
