@@ -8,6 +8,7 @@ import ru.labun.doublegisexercise.service.SearcherService;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -19,50 +20,45 @@ public class SearcherServiceImpl implements SearcherService {
     private DoubleGisService doubleGisService;
 
     @Override
-    public Profile getMostPopular(String where, String what) {
+    public Optional<Profile> getMostPopular(String where, String what) {
         SearchResponse response = doubleGisService.search(where, what, Sorting.rating);
 
         if (response.isError()) {
             log.warn(response.getErrorMessage());
-            return null;
+            return Optional.empty();
         }
 
         if (response.getResults() == null) {
             log.info(String.format("Zero results for where=`%1$s` and what=`%2$s`",
                     where, what));
-            return null;
+            return Optional.empty();
         }
 
-        String profileId = response.getResults().stream().findFirst()
-                .map(SearchResult::getId)
-                .orElse(null);
-
-        if (profileId == null) {
-            return null;
-        }
-
-        return getProfile(profileId);
+        return response.getResults().stream().findFirst()
+                .map(it -> it.getId())
+                .flatMap(this::getProfile);
     }
 
-    private Profile getProfile(String profileId) {
+    private Optional<Profile> getProfile(String profileId) {
         ProfileResponse response = doubleGisService.profile(profileId);
         if (response.isError()) {
             log.warn(response.getErrorMessage());
-            return null;
+            return Optional.empty();
         }
-        return ProfileResponseWrapper.wrap(response);
+        return Optional.of(ProfileResponseWrapper.wrap(response));
     }
 
     @Override
-    public List<Profile> getMostPopular(List<String> where, String what) {
-        return where.parallelStream()
+    public Optional<List<Profile>> getMostPopular(List<String> where, String what) {
+        return Optional.of(where.parallelStream()
                 .map(it -> getMostPopular(it, what))
-                .filter(it -> it != null)
+                .filter(it -> it.isPresent())
+                .map(it -> it.get())
                 .sorted((o1, o2) -> {
                     String o1Rate = ObjectUtils.defaultIfNull(o1.getRating(), "0.0");
                     String o2Rate = ObjectUtils.defaultIfNull(o2.getRating(), "0.0");
                     return -1 * o1Rate.compareTo(o2Rate);
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 }

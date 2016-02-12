@@ -11,6 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,6 +28,6 @@ public class SyberiaSearchResource {
     @Path("/{what}")
     @Produces("application/json;charset=utf-8")
     public List<Profile> search(@NotNull @PathParam("what") String what) {
-        return searcherService.getMostPopular(syberiaCities, what);
+        return searcherService.getMostPopular(syberiaCities, what).orElse(Collections.emptyList());
     }
 }
